@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Work Connect - Find Work • Share Work • Connect</title>
+  <meta name="description" content="Work Connect is a modern, no-brokerage platform connecting skilled workers, technicians, and local employers directly." />
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card" style="max-width: 520px;">
+      <div class="auth-logo-badge">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+      </div>
+
+      <h1 class="auth-title" data-i18n="auth_welcome_title">WORK CONNECT</h1>
+      <p class="auth-tagline" data-i18n="auth_welcome_sub">Find Work • Share Work • Connect</p>
+      <p style="font-size: 0.95rem; color: var(--text-body); margin-bottom: 2rem; line-height: 1.6;" data-i18n="brand_subtext">
+        India's premier localized work discovery and hiring portal. Connecting skilled professionals, carpenters, electricians, plumbers, and contractors directly.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+        <a href="login.html" class="btn btn-primary btn-lg" id="btn-get-started" style="font-size: 1.05rem;">
+          Get Started / Login →
+        </a>
+        <a href="home.html" class="btn btn-secondary" id="btn-browse-works">
+          Browse Open Works
+        </a>
+      </div>
+
+      <div class="auth-highlights">
+        <div class="highlight-item">
+          <div class="highlight-icon">⚡</div>
+          <div class="highlight-text" data-i18n="auth_feature_1">Quick Matching</div>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-icon">🛡️</div>
+          <div class="highlight-text" data-i18n="auth_feature_2">Verified Contacts</div>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-icon">📞</div>
+          <div class="highlight-text" data-i18n="auth_feature_3">Direct Calling</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { listenToAuth, checkUserProfileExists } from "./js/common.js";
+    import { applyPageTranslations } from "./js/translations.js";
+
+    // Immediate smart redirection if session is active
+    listenToAuth(async (user) => {
+      if (user) {
+        const hasProfile = await checkUserProfileExists(user.uid);
+        if (hasProfile) {
+          window.location.href = "home.html";
+        } else {
+          window.location.href = "profile-setup.html";
+        }
+      }
+    });
+
+    applyPageTranslations();
+  </script>
+</body>
+</html>

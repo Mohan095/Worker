@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+  <!-- Icon Symbol: Connected Nodes / Briefcase Bridge -->
+  <rect x="4" y="6" width="28" height="28" rx="8" fill="url(#brandGrad)" />
+  <path d="M14 15V13C14 11.8954 14.8954 11 16 11H20C21.1046 11 22 11.8954 22 13V15" stroke="white" stroke-width="2" stroke-linecap="round" />
+  <path d="M10 16H26C27.1046 16 28 16.8954 28 18V26C28 27.1046 27.1046 28 26 28H10C8.89543 28 8 27.1046 8 26V18C8 16.8954 8.89543 16 10 16Z" stroke="white" stroke-width="2" />
+  <circle cx="18" cy="22" r="2" fill="white" />
+  <path d="M12 20L16 23M24 20L20 23" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
+  
+  <!-- Wordmark -->
+  <text x="40" y="22" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="800" fill="#0f172a" letter-spacing="-0.5">WORK</text>
+  <text x="89" y="22" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="800" fill="#2563eb" letter-spacing="-0.5">CONNECT</text>
+  <text x="41" y="32" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="8" font-weight="600" fill="#64748b" letter-spacing="1.2">JOBS • OPPORTUNITIES</text>
+</svg>

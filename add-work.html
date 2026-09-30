@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post a New Work - Work Connect</title>
+  <meta name="description" content="Publish a work requirement and connect directly with verified local skilled workers." />
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+  <div id="app-header-container"></div>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 760px;">
+      <div class="page-title-section">
+        <h1 class="page-title" data-i18n="add_work_title">Post a New Work</h1>
+        <p class="page-subtitle" data-i18n="add_work_sub">Fill in the work specifications so skilled workers can find and contact you.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <form id="add-work-form" novalidate>
+            <!-- Work Name -->
+            <div class="form-group">
+              <label class="form-label" for="input-work-name">
+                <span data-i18n="lbl_work_name">Work Title / Role</span> <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="input-work-name"
+                class="form-control"
+                placeholder="e.g. Experienced House Electrician Needed for Villa"
+                required
+              />
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label class="form-label" for="select-category">
+                <span data-i18n="lbl_category">Category</span> <span class="required">*</span>
+              </label>
+              <select id="select-category" class="form-control" required>
+                <option value="Electrical & Wiring">Electrical & Wiring (எலக்ட்ரீசியன்)</option>
+                <option value="Carpentry & Woodwork">Carpentry & Woodwork (மர வேலை / தச்சர்)</option>
+                <option value="Plumbing">Plumbing (பிளம்பர்)</option>
+                <option value="Painting">Painting (பெயிண்டர்)</option>
+                <option value="Construction & Labor">Construction & Labor (கட்டுமானம் / கூலி)</option>
+                <option value="Driver & Delivery">Driver & Delivery (ஓட்டுநர்)</option>
+                <option value="Housekeeping & Maid">Housekeeping & Maid (வீட்டு வேலை)</option>
+                <option value="Cooking & Catering">Cooking & Catering (சமையல்)</option>
+                <option value="Shop & Retail">Shop & Retail (கடை / விற்பனை)</option>
+                <option value="Other Work">Other Work (மற்ற வேலைகள்)</option>
+              </select>
+            </div>
+
+            <!-- Work Place & Address in Two Columns -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="input-work-place">
+                  <span data-i18n="lbl_work_place">Workplace / Landmark</span> <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="input-work-place"
+                  class="form-control"
+                  placeholder="e.g. Metro Heights Site, Velachery"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="input-work-address">
+                  <span data-i18n="lbl_work_address">Full Address / City</span> <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="input-work-address"
+                  class="form-control"
+                  placeholder="e.g. 100 Feet Road, Chennai"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Mobile 1 & Mobile 2 -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="input-mobile-1">
+                  <span data-i18n="lbl_mobile_1">Primary Mobile Number</span> <span class="required">*</span>
+                </label>
+                <input
+                  type="tel"
+                  id="input-mobile-1"
+                  class="form-control"
+                  placeholder="10-digit number"
+                  maxlength="10"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="input-mobile-2">
+                  <span data-i18n="lbl_mobile_2">Alternative Mobile (Optional)</span>
+                </label>
+                <input
+                  type="tel"
+                  id="input-mobile-2"
+                  class="form-control"
+                  placeholder="Optional 10-digit number"
+                  maxlength="10"
+                />
+              </div>
+            </div>
+
+            <!-- Work Description -->
+            <div class="form-group">
+              <label class="form-label" for="input-work-desc">
+                <span data-i18n="lbl_work_desc">Detailed Work Description</span>
+              </label>
+              <textarea
+                id="input-work-desc"
+                class="form-control"
+                rows="4"
+                placeholder="Describe working hours, daily wages or contract amount, tools provided, and expectations..."
+                data-i18n-placeholder="placeholder_work_desc"
+              ></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+              <a href="home.html" class="btn btn-secondary">
+                <span data-i18n="btn_cancel">Cancel</span>
+              </a>
+              <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-work">
+                <span data-i18n="btn_submit_work">Publish Work</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="mobile-bottom-nav"></div>
+
+  <script type="module">
+    import { protectPage, renderHeader, renderMobileBottomBar } from "./js/common.js";
+    import { initAddWorkPage } from "./js/works.js";
+
+    protectPage({ requireAuth: true });
+    renderHeader("add-work");
+    renderMobileBottomBar("add-work");
+    initAddWorkPage();
+  </script>
+</body>
+</html>

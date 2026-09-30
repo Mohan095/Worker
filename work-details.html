@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Work Details - Work Connect</title>
+  <meta name="description" content="View full work specifications, employer contact details, and apply directly." />
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+  <div id="app-header-container"></div>
+
+  <main class="main-content">
+    <div class="container work-details-container">
+      <div id="work-details-content">
+        <div class="loading-container">
+          <span class="spinner"></span>
+          <p>Loading work details...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="mobile-bottom-nav"></div>
+
+  <script type="module">
+    import { protectPage, renderHeader, renderMobileBottomBar } from "./js/common.js";
+    import { initWorkDetailsPage } from "./js/applications.js";
+
+    protectPage({ requireAuth: false });
+    renderHeader("home");
+    renderMobileBottomBar("home");
+    initWorkDetailsPage();
+  </script>
+</body>
+</html>
