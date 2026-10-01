@@ -60,7 +60,7 @@ export function initLanguagePage() {
               }
             }
           } catch (e) {
-            console.warn("Could not save language to Firestore profile:", e);
+            // Silently handle offline/rule error
           }
         }
 

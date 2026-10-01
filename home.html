@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Available Works - Work Connect</title>
-  <meta name="description" content="Explore available local jobs, labor works, carpentry, electrical, plumbing, and other skilled works." />
+  <title>Available Work - Worker</title>
+  <meta name="description" content="Explore active 24-hour work posts, jobs, and skilled worker opportunities near you." />
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
   
   <link rel="stylesheet" href="css/style.css" />
@@ -22,12 +22,12 @@
       <div class="page-title-section">
         <div class="page-title-row">
           <div>
-            <h1 class="page-title" data-i18n="home_heading">Available Works</h1>
-            <p class="page-subtitle" data-i18n="home_subheading">Explore local jobs and work opportunities near you.</p>
+            <h1 class="page-title">Available Work</h1>
+            <p class="page-subtitle">Real-time work posts available for 24 hours. Connect directly with owners.</p>
           </div>
-          <a href="add-work.html" class="btn btn-primary">
+          <a href="add-work.html" class="btn btn-primary" id="btn-home-add-work">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span data-i18n="nav_add_work">Add Work</span>
+            <span>Post New Work</span>
           </a>
         </div>
       </div>
@@ -43,24 +43,25 @@
             type="text"
             id="search-works-input"
             class="search-input"
-            placeholder="Search work, workplace or location..."
-            data-i18n-placeholder="search_placeholder"
+            placeholder="Search by owner, city, state, address, category, or details..."
           />
         </div>
 
         <!-- Category Horizontal Pills -->
         <div class="category-chips">
-          <button class="chip-btn active" data-category="all" data-i18n="cat_all">All Categories</button>
-          <button class="chip-btn" data-category="Electrical & Wiring" data-i18n="cat_electrician">Electrical & Wiring</button>
-          <button class="chip-btn" data-category="Carpentry & Woodwork" data-i18n="cat_carpenter">Carpentry & Woodwork</button>
-          <button class="chip-btn" data-category="Plumbing" data-i18n="cat_plumber">Plumbing</button>
-          <button class="chip-btn" data-category="Painting" data-i18n="cat_painting">Painting</button>
-          <button class="chip-btn" data-category="Construction & Labor" data-i18n="cat_construction">Construction & Labor</button>
-          <button class="chip-btn" data-category="Driver & Delivery" data-i18n="cat_driving">Driver & Delivery</button>
-          <button class="chip-btn" data-category="Housekeeping & Maid" data-i18n="cat_housekeeping">Housekeeping & Maid</button>
-          <button class="chip-btn" data-category="Cooking & Catering" data-i18n="cat_cooking">Cooking & Catering</button>
-          <button class="chip-btn" data-category="Shop & Retail" data-i18n="cat_retail">Shop & Retail</button>
-          <button class="chip-btn" data-category="Other Work" data-i18n="cat_other">Other Work</button>
+          <button class="chip-btn active" data-category="all">All Categories</button>
+          <button class="chip-btn" data-category="Construction">Construction</button>
+          <button class="chip-btn" data-category="Electrical">Electrical</button>
+          <button class="chip-btn" data-category="Plumbing">Plumbing</button>
+          <button class="chip-btn" data-category="Driving">Driving</button>
+          <button class="chip-btn" data-category="Delivery">Delivery</button>
+          <button class="chip-btn" data-category="Cleaning">Cleaning</button>
+          <button class="chip-btn" data-category="Computer / IT">Computer / IT</button>
+          <button class="chip-btn" data-category="Office Work">Office Work</button>
+          <button class="chip-btn" data-category="Factory Work">Factory Work</button>
+          <button class="chip-btn" data-category="Agriculture">Agriculture</button>
+          <button class="chip-btn" data-category="Shop Work">Shop Work</button>
+          <button class="chip-btn" data-category="Other">Other</button>
         </div>
       </div>
 
@@ -80,7 +81,7 @@
   <!-- Footer -->
   <footer class="app-footer">
     <div class="container footer-inner">
-      <div>© 2026 Work Connect. Connecting workers & employers directly.</div>
+      <div>© 2026 Worker. 24-hour direct job discovery.</div>
       <div style="display: flex; gap: 1rem;">
         <a href="language.html" style="color: var(--text-muted);">Language / மொழி</a>
         <a href="profile.html" style="color: var(--text-muted);">My Account</a>

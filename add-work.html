@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Post a New Work - Work Connect</title>
-  <meta name="description" content="Publish a work requirement and connect directly with verified local skilled workers." />
+  <title>Post a New Work - Worker</title>
+  <meta name="description" content="Post a new work requirement available for 24 hours to find skilled workers near you." />
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
   
   <link rel="stylesheet" href="css/style.css" />
@@ -16,129 +16,179 @@
 
   <main class="main-content">
     <div class="container" style="max-width: 760px;">
-      <div class="page-title-section">
-        <h1 class="page-title" data-i18n="add_work_title">Post a New Work</h1>
-        <p class="page-subtitle" data-i18n="add_work_sub">Fill in the work specifications so skilled workers can find and contact you.</p>
-      </div>
+      <!-- Form Section Container -->
+      <div id="post-work-section">
+        <div class="page-title-section">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+            <h1 class="page-title">POST A NEW WORK</h1>
+            <span class="badge badge-warning" style="font-size: 0.8rem; font-weight: 700;">⏱ 24 Hours Only</span>
+          </div>
+          <p class="page-subtitle">Every work post is available for only 24 hours before automatic expiry.</p>
+        </div>
 
-      <div class="card">
-        <div class="card-body">
-          <form id="add-work-form" novalidate>
-            <!-- Work Name -->
-            <div class="form-group">
-              <label class="form-label" for="input-work-name">
-                <span data-i18n="lbl_work_name">Work Title / Role</span> <span class="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="input-work-name"
-                class="form-control"
-                placeholder="e.g. Experienced House Electrician Needed for Villa"
-                required
-              />
-            </div>
-
-            <!-- Category -->
-            <div class="form-group">
-              <label class="form-label" for="select-category">
-                <span data-i18n="lbl_category">Category</span> <span class="required">*</span>
-              </label>
-              <select id="select-category" class="form-control" required>
-                <option value="Electrical & Wiring">Electrical & Wiring (எலக்ட்ரீசியன்)</option>
-                <option value="Carpentry & Woodwork">Carpentry & Woodwork (மர வேலை / தச்சர்)</option>
-                <option value="Plumbing">Plumbing (பிளம்பர்)</option>
-                <option value="Painting">Painting (பெயிண்டர்)</option>
-                <option value="Construction & Labor">Construction & Labor (கட்டுமானம் / கூலி)</option>
-                <option value="Driver & Delivery">Driver & Delivery (ஓட்டுநர்)</option>
-                <option value="Housekeeping & Maid">Housekeeping & Maid (வீட்டு வேலை)</option>
-                <option value="Cooking & Catering">Cooking & Catering (சமையல்)</option>
-                <option value="Shop & Retail">Shop & Retail (கடை / விற்பனை)</option>
-                <option value="Other Work">Other Work (மற்ற வேலைகள்)</option>
-              </select>
-            </div>
-
-            <!-- Work Place & Address in Two Columns -->
-            <div class="form-row">
+        <div class="card">
+          <div class="card-body">
+            <form id="add-work-form" novalidate>
+              <!-- Worker Owner Name -->
               <div class="form-group">
-                <label class="form-label" for="input-work-place">
-                  <span data-i18n="lbl_work_place">Workplace / Landmark</span> <span class="required">*</span>
+                <label class="form-label" for="input-owner-name">
+                  Worker Owner Name <span class="required">*</span>
                 </label>
                 <input
                   type="text"
-                  id="input-work-place"
+                  id="input-owner-name"
                   class="form-control"
-                  placeholder="e.g. Metro Heights Site, Velachery"
+                  placeholder="Enter worker owner or company name"
                   required
                 />
               </div>
 
+              <!-- Work City & Work State in 2 columns -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="input-work-city">
+                    Work City <span class="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="input-work-city"
+                    class="form-control"
+                    placeholder="e.g. Sivakasi, Madurai, Chennai"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="input-work-state">
+                    Work State <span class="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="input-work-state"
+                    class="form-control"
+                    placeholder="e.g. Tamil Nadu, Kerala, Karnataka"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Work Address -->
               <div class="form-group">
                 <label class="form-label" for="input-work-address">
-                  <span data-i18n="lbl_work_address">Full Address / City</span> <span class="required">*</span>
+                  Work Address <span class="required">*</span>
                 </label>
                 <input
                   type="text"
                   id="input-work-address"
                   class="form-control"
-                  placeholder="e.g. 100 Feet Road, Chennai"
-                  required
-                />
-              </div>
-            </div>
-
-            <!-- Mobile 1 & Mobile 2 -->
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="input-mobile-1">
-                  <span data-i18n="lbl_mobile_1">Primary Mobile Number</span> <span class="required">*</span>
-                </label>
-                <input
-                  type="tel"
-                  id="input-mobile-1"
-                  class="form-control"
-                  placeholder="10-digit number"
-                  maxlength="10"
+                  placeholder="e.g. No. 42, Main Bazaar Road, Near Bus Stand"
                   required
                 />
               </div>
 
-              <div class="form-group">
-                <label class="form-label" for="input-mobile-2">
-                  <span data-i18n="lbl_mobile_2">Alternative Mobile (Optional)</span>
-                </label>
-                <input
-                  type="tel"
-                  id="input-mobile-2"
-                  class="form-control"
-                  placeholder="Optional 10-digit number"
-                  maxlength="10"
-                />
+              <!-- Mobile Number 1 & Mobile Number 2 -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="input-mobile-1">
+                    Mobile Number 1 <span class="required">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="input-mobile-1"
+                    class="form-control"
+                    placeholder="10-digit mobile number"
+                    maxlength="10"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="input-mobile-2">
+                    Mobile Number 2 <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="input-mobile-2"
+                    class="form-control"
+                    placeholder="Optional 10-digit mobile number"
+                    maxlength="10"
+                  />
+                </div>
               </div>
-            </div>
 
-            <!-- Work Description -->
-            <div class="form-group">
-              <label class="form-label" for="input-work-desc">
-                <span data-i18n="lbl_work_desc">Detailed Work Description</span>
-              </label>
-              <textarea
-                id="input-work-desc"
-                class="form-control"
-                rows="4"
-                placeholder="Describe working hours, daily wages or contract amount, tools provided, and expectations..."
-                data-i18n-placeholder="placeholder_work_desc"
-              ></textarea>
-            </div>
+              <!-- Category Dropdown -->
+              <div class="form-group">
+                <label class="form-label" for="select-category">
+                  Category <span class="required">*</span>
+                </label>
+                <select id="select-category" class="form-control" required>
+                  <option value="" disabled selected>Select Category ▼</option>
+                  <option value="Construction">Construction</option>
+                  <option value="Electrical">Electrical</option>
+                  <option value="Plumbing">Plumbing</option>
+                  <option value="Driving">Driving</option>
+                  <option value="Delivery">Delivery</option>
+                  <option value="Cleaning">Cleaning</option>
+                  <option value="Computer / IT">Computer / IT</option>
+                  <option value="Office Work">Office Work</option>
+                  <option value="Factory Work">Factory Work</option>
+                  <option value="Agriculture">Agriculture</option>
+                  <option value="Shop Work">Shop Work</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
-              <a href="home.html" class="btn btn-secondary">
-                <span data-i18n="btn_cancel">Cancel</span>
-              </a>
-              <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-work">
-                <span data-i18n="btn_submit_work">Publish Work</span>
-              </button>
-            </div>
-          </form>
+              <!-- Detailed Work -->
+              <div class="form-group">
+                <label class="form-label" for="input-work-details">
+                  Detailed Work <span class="required">*</span>
+                </label>
+                <textarea
+                  id="input-work-details"
+                  class="form-control"
+                  rows="5"
+                  placeholder="Describe duties, required tools, timings, wages, or specific requirements..."
+                  required
+                ></textarea>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                <a href="home.html" class="btn btn-secondary">
+                  Cancel
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-work">
+                  POST WORK
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Confirmation Section (Shown after posting) -->
+      <div id="post-success-section" style="display: none;">
+        <div class="card" style="text-align: center; padding: 3rem 2rem;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--success-light); color: var(--success); display: inline-flex; align-items: center; justify-content: center; font-size: 2.2rem; margin-bottom: 1.5rem; border: 2px solid #a7f3d0;">
+            ✓
+          </div>
+          <h2 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: -0.5px;">
+            WORK POSTED SUCCESSFULLY
+          </h2>
+          <p style="font-size: 1.15rem; color: var(--text-body); margin-bottom: 0.5rem;">
+            Your work is available for <strong>24 hours</strong>.
+          </p>
+          <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem;">
+            It will automatically expire and be removed from Available Work once 24 hours have elapsed.
+          </p>
+
+          <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+            <a href="#" id="btn-success-view-work" class="btn btn-primary btn-lg">
+              VIEW WORK
+            </a>
+            <a href="home.html" class="btn btn-secondary btn-lg">
+              BACK TO AVAILABLE WORK
+            </a>
+          </div>
         </div>
       </div>
     </div>

@@ -12,58 +12,72 @@ service cloud.firestore {
     }
 
     // USERS COLLECTION
-    // users/{uid}
+    // users/{userId}
     match /users/{userId} {
-      // Authenticated users can read and write only their own profile document
-      allow read: if isAuthenticated() && (request.auth.uid == userId);
-      allow create: if isAuthenticated() && (request.auth.uid == userId);
-      allow update: if isAuthenticated() && (request.auth.uid == userId);
-      allow delete: if false; // Profiles cannot be deleted directly
+      // Authenticated user can read, create, and update only their own profile
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false;
     }
 
     // WORKS COLLECTION
     // works/{workId}
     match /works/{workId} {
-      // Anyone authenticated can read active works, or the owner can read their own works
-      allow read: if isAuthenticated() && (
-        resource.data.status == "active" || resource.data.postedBy == request.auth.uid
+      // Anyone can read active, unexpired work posts; owners can read their own works
+      allow read: if (
+        resource.data.status == "active" &&
+        (resource.data.expiresAt == null || request.time < resource.data.expiresAt)
+      ) || (
+        isAuthenticated() && resource.data.ownerId == request.auth.uid
       );
 
-      // Authenticated users can create a work, but postedBy must match their UID
-      allow create: if isAuthenticated() && request.resource.data.postedBy == request.auth.uid;
+      // Authenticated users can create work; ownerId must match auth UID
+      allow create: if isAuthenticated() &&
+        request.resource.data.ownerId == request.auth.uid &&
+        request.resource.data.status == "active" &&
+        request.resource.data.applicantsCount == 0 &&
+        request.resource.data.expiresAt > request.time;
 
-      // Only the work owner can update, deactivate, or delete their work
-      // Allow applicantsCount increment by authenticated applicants during application submission
+      // Only work owner can edit/deactivate/delete their work
+      // Allow applicantsCount increment by 1 for applying to an active unexpired work
       allow update: if isAuthenticated() && (
-        resource.data.postedBy == request.auth.uid ||
         (
+          resource.data.ownerId == request.auth.uid &&
+          request.resource.data.ownerId == resource.data.ownerId
+        ) || (
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['applicantsCount']) &&
-          request.resource.data.applicantsCount == resource.data.applicantsCount + 1
+          request.resource.data.applicantsCount == resource.data.applicantsCount + 1 &&
+          resource.data.status == "active" &&
+          (resource.data.expiresAt == null || request.time < resource.data.expiresAt)
         )
       );
 
-      allow delete: if isAuthenticated() && resource.data.postedBy == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
     }
 
     // APPLICATIONS COLLECTION
     // applications/{applicationId}
     match /applications/{applicationId} {
-      // An application can be read by:
-      // 1. The applicant themselves (applicantId == request.auth.uid)
-      // 2. The owner of the corresponding work posting
+      // Readable by applicant or work owner
       allow read: if isAuthenticated() && (
         resource.data.applicantId == request.auth.uid ||
-        get(/databases/$(database)/documents/works/$(resource.data.workId)).data.postedBy == request.auth.uid
+        get(/databases/$(database)/documents/works/$(resource.data.workId)).data.ownerId == request.auth.uid
       );
 
-      // Authenticated users can submit applications for themselves only
-      allow create: if isAuthenticated() && request.resource.data.applicantId == request.auth.uid;
+      // Authenticated user can apply for themselves only
+      // Backend validation: work must be active and current time < expiresAt
+      allow create: if isAuthenticated() &&
+        request.resource.data.applicantId == request.auth.uid &&
+        request.resource.data.status == "pending" &&
+        get(/databases/$(database)/documents/works/$(request.resource.data.workId)).data.status == "active" &&
+        request.time < get(/databases/$(database)/documents/works/$(request.resource.data.workId)).data.expiresAt;
 
-      // Only authorized work owner can change application status (e.g. pending -> accepted / rejected)
-      allow update: if isAuthenticated() && (
-        get(/databases/$(database)/documents/works/$(resource.data.workId)).data.postedBy == request.auth.uid &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
-      );
+      // Only authorized work owner can update application status
+      allow update: if isAuthenticated() &&
+        get(/databases/$(database)/documents/works/$(resource.data.workId)).data.ownerId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        (request.resource.data.status in ['pending', 'accepted', 'rejected']);
 
       allow delete: if false;
     }

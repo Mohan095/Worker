@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Posted Works - Work Connect</title>
-  <meta name="description" content="Manage your posted work requirements and review candidate applications." />
+  <title>My Works - Worker</title>
+  <meta name="description" content="Manage your active and expired 24-hour work posts and review applicants." />
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
   
   <link rel="stylesheet" href="css/style.css" />
@@ -19,21 +19,52 @@
       <div class="page-title-section">
         <div class="page-title-row">
           <div>
-            <h1 class="page-title" data-i18n="my_works_title">My Posted Works</h1>
-            <p class="page-subtitle" data-i18n="my_works_sub">Manage the work listings you have published and view candidate applications.</p>
+            <h1 class="page-title">My Works</h1>
+            <p class="page-subtitle">Manage your posted work requirements and review worker applications.</p>
           </div>
           <a href="add-work.html" class="btn btn-primary">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span data-i18n="nav_add_work">Add Work</span>
+            <span>Post New Work</span>
           </a>
         </div>
       </div>
 
-      <!-- Works List Container -->
-      <div id="my-works-container" style="display: flex; flex-direction: column; gap: 1.25rem;">
-        <div class="loading-container">
-          <span class="spinner"></span>
-          <p>Loading your work postings...</p>
+      <!-- Main Works Sections Wrapper -->
+      <div id="my-works-wrapper" style="display: flex; flex-direction: column; gap: 2.5rem;">
+        <!-- ACTIVE WORKS SECTION -->
+        <div class="works-group-container">
+          <div class="works-group-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.3px;">ACTIVE WORKS</h2>
+              <span class="badge badge-success" id="active-works-count">0</span>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Available & Accepting Applications</span>
+          </div>
+
+          <div id="my-active-works-list" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="loading-container">
+              <span class="spinner"></span>
+              <p>Loading your active works...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPIRED WORKS SECTION -->
+        <div class="works-group-container">
+          <div class="works-group-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--text-muted); letter-spacing: -0.3px;">EXPIRED WORKS</h2>
+              <span class="badge badge-warning" id="expired-works-count">0</span>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">24-Hour Period Ended • Closed</span>
+          </div>
+
+          <div id="my-expired-works-list" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="loading-container">
+              <span class="spinner"></span>
+              <p>Loading expired works...</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -41,63 +72,70 @@
 
   <!-- Edit Work Modal -->
   <div class="modal-backdrop" id="edit-work-modal">
-    <div class="modal-dialog" style="max-width: 620px;">
+    <div class="modal-dialog" style="max-width: 640px;">
       <div class="modal-header">
-        <h3 class="modal-title">Edit Work Listing</h3>
+        <h3 class="modal-title">Edit Work</h3>
         <button class="modal-close-btn" id="btn-close-edit-work">&times;</button>
       </div>
-      <form id="edit-work-form">
+      <form id="edit-work-form" novalidate>
         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
           <input type="hidden" id="edit-work-id" />
           
           <div class="form-group">
-            <label class="form-label" for="edit-work-name">Work Title / Role <span class="required">*</span></label>
-            <input type="text" id="edit-work-name" class="form-control" required />
+            <label class="form-label" for="edit-owner-name">Worker Owner Name <span class="required">*</span></label>
+            <input type="text" id="edit-owner-name" class="form-control" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="edit-work-city">Work City <span class="required">*</span></label>
+              <input type="text" id="edit-work-city" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="edit-work-state">Work State <span class="required">*</span></label>
+              <input type="text" id="edit-work-state" class="form-control" required />
+            </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="edit-work-category">Category <span class="required">*</span></label>
-            <select id="edit-work-category" class="form-control" required>
-              <option value="Electrical & Wiring">Electrical & Wiring</option>
-              <option value="Carpentry & Woodwork">Carpentry & Woodwork</option>
+            <label class="form-label" for="edit-work-address">Work Address <span class="required">*</span></label>
+            <input type="text" id="edit-work-address" class="form-control" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="edit-mobile-1">Mobile Number 1 <span class="required">*</span></label>
+              <input type="tel" id="edit-mobile-1" class="form-control" maxlength="10" required />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="edit-mobile-2">Mobile Number 2 (Optional)</label>
+              <input type="tel" id="edit-mobile-2" class="form-control" maxlength="10" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-category">Category <span class="required">*</span></label>
+            <select id="edit-category" class="form-control" required>
+              <option value="Construction">Construction</option>
+              <option value="Electrical">Electrical</option>
               <option value="Plumbing">Plumbing</option>
-              <option value="Painting">Painting</option>
-              <option value="Construction & Labor">Construction & Labor</option>
-              <option value="Driver & Delivery">Driver & Delivery</option>
-              <option value="Housekeeping & Maid">Housekeeping & Maid</option>
-              <option value="Cooking & Catering">Cooking & Catering</option>
-              <option value="Shop & Retail">Shop & Retail</option>
-              <option value="Other Work">Other Work</option>
+              <option value="Driving">Driving</option>
+              <option value="Delivery">Delivery</option>
+              <option value="Cleaning">Cleaning</option>
+              <option value="Computer / IT">Computer / IT</option>
+              <option value="Office Work">Office Work</option>
+              <option value="Factory Work">Factory Work</option>
+              <option value="Agriculture">Agriculture</option>
+              <option value="Shop Work">Shop Work</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="edit-work-place">Workplace <span class="required">*</span></label>
-              <input type="text" id="edit-work-place" class="form-control" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-work-address">Address <span class="required">*</span></label>
-              <input type="text" id="edit-work-address" class="form-control" required />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="edit-work-mobile1">Primary Mobile <span class="required">*</span></label>
-              <input type="tel" id="edit-work-mobile1" class="form-control" maxlength="10" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-work-mobile2">Alternative Mobile</label>
-              <input type="tel" id="edit-work-mobile2" class="form-control" maxlength="10" />
-            </div>
-          </div>
-
           <div class="form-group">
-            <label class="form-label" for="edit-work-desc">Work Description</label>
-            <textarea id="edit-work-desc" class="form-control" rows="4"></textarea>
+            <label class="form-label" for="edit-work-details">Detailed Work <span class="required">*</span></label>
+            <textarea id="edit-work-details" class="form-control" rows="4" required></textarea>
           </div>
         </div>
 
@@ -113,7 +151,7 @@
   <div class="modal-backdrop" id="applicants-modal">
     <div class="modal-dialog" style="max-width: 680px;">
       <div class="modal-header">
-        <h3 class="modal-title" id="applicants-modal-title">Review Applicants</h3>
+        <h3 class="modal-title" id="applicants-modal-title">APPLICANTS</h3>
         <button class="modal-close-btn" id="btn-close-applicants-modal">&times;</button>
       </div>
       <div class="modal-body">

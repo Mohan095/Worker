@@ -100,7 +100,6 @@ export async function checkUserProfileExists(uid) {
       const snap = await getDoc(doc(db, "users", uid));
       return snap.exists();
     } catch (e) {
-      console.warn("Could not check Firestore profile:", e);
       return false;
     }
   } else {
@@ -139,15 +138,6 @@ export function renderHeader(activePage = "") {
   const currentLang = getAppLanguage();
 
   container.innerHTML = `
-    ${isDemoMode ? `
-      <div class="demo-banner">
-        <div>
-          <span class="demo-badge">Demo Mode Active</span>
-          <span>Running with sample data & mock auth. Firebase config placeholders are active.</span>
-        </div>
-        <button id="btn-config-dialog" class="btn btn-sm btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;">Enter Firebase Keys</button>
-      </div>
-    ` : ""}
     <header class="app-header">
       <div class="container header-inner">
         <!-- Logo -->
@@ -233,12 +223,6 @@ export function renderHeader(activePage = "") {
       }
     }
   });
-
-  // Setup config dialog button if in demo mode
-  const configBtn = document.getElementById("btn-config-dialog");
-  if (configBtn) {
-    configBtn.addEventListener("click", showFirebaseConfigModal);
-  }
 }
 
 /**

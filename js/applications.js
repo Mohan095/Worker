@@ -1,6 +1,7 @@
 /**
  * WORK CONNECT - APPLICATIONS CONTROLLER
- * Work Details view, Direct Calling/Copy, Duplicate-safe Apply logic, and My Applications view.
+ * Work Details View, Real-Time 24-Hour Expiry Verification,
+ * Duplicate-Safe Apply, Mobile/Desktop Contact Calling, and My Applications Tracker.
  */
 
 import {
@@ -19,8 +20,8 @@ import {
   increment,
   serverTimestamp
 } from "./firebase-config.js";
-import { listenToAuth, showToast, formatDate, icons, getUserProfile } from "./common.js";
-import { t } from "./translations.js";
+import { listenToAuth, showToast, icons, getUserProfile } from "./common.js";
+import { getExpiryDate, getCreatedDate, formatRemainingTime, escapeHtml } from "./works.js";
 
 /**
  * Initialize Work Details Page (work-details.html)
@@ -38,7 +39,7 @@ export function initWorkDetailsPage() {
       <div class="empty-state">
         <h3 class="empty-state-title">Invalid Request</h3>
         <p class="empty-state-desc">No work ID was specified in the link.</p>
-        <a href="home.html" class="btn btn-primary">${t("btn_back")}</a>
+        <a href="home.html" class="btn btn-primary">BACK TO AVAILABLE WORK</a>
       </div>
     `;
     return;
@@ -47,7 +48,7 @@ export function initWorkDetailsPage() {
   listenToAuth(async (user) => {
     let currentWork = null;
 
-    // Load work data
+    // Load work data from Firestore or Mock Store
     if (!isDemoMode && db) {
       try {
         const snap = await getDoc(doc(db, "works", workId));
@@ -55,7 +56,13 @@ export function initWorkDetailsPage() {
           currentWork = { id: snap.id, workId: snap.id, ...snap.data() };
         }
       } catch (e) {
-        console.error("Error fetching work details:", e);
+        // Fallback search
+        try {
+          const allSnap = await getDocs(collection(db, "works"));
+          allSnap.forEach((d) => {
+            if (d.id === workId) currentWork = { id: d.id, workId: d.id, ...d.data() };
+          });
+        } catch (err) { /* silent */ }
       }
     } else {
       const data = mockStore.getData();
@@ -66,15 +73,21 @@ export function initWorkDetailsPage() {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">⚠️</div>
-          <h3 class="empty-state-title">${t("work_not_found")}</h3>
-          <p class="empty-state-desc">This job listing may have been completed, removed by the owner, or expired.</p>
-          <a href="home.html" class="btn btn-primary">${t("btn_back")}</a>
+          <h3 class="empty-state-title">Work Not Found</h3>
+          <p class="empty-state-desc">This work posting does not exist or may have been permanently removed.</p>
+          <a href="home.html" class="btn btn-primary">BACK TO AVAILABLE WORK</a>
         </div>
       `;
       return;
     }
 
-    // Check if the current user already applied
+    // Check authoritative 24-hour expiry (Requirement 5, 9, 18)
+    const expDate = getExpiryDate(currentWork);
+    const createdDate = getCreatedDate(currentWork);
+    const now = Date.now();
+    const isExpired = currentWork.status !== "active" || !expDate || (expDate.getTime() <= now);
+
+    // Check if the current logged-in user already applied
     let hasApplied = false;
     let existingApp = null;
     if (user) {
@@ -91,7 +104,17 @@ export function initWorkDetailsPage() {
             existingApp = snap.docs[0].data();
           }
         } catch (e) {
-          console.warn("Could not check existing application in Firestore:", e);
+          // Fallback check
+          try {
+            const snap = await getDocs(collection(db, "applications"));
+            snap.forEach((d) => {
+              const data = d.data();
+              if (data.workId === workId && data.applicantId === user.uid) {
+                hasApplied = true;
+                existingApp = data;
+              }
+            });
+          } catch (err) { /* silent */ }
         }
       } else {
         const data = mockStore.getData();
@@ -101,103 +124,178 @@ export function initWorkDetailsPage() {
       }
     }
 
-    const isOwner = user && user.uid === currentWork.postedBy;
+    const isOwner = user && user.uid === currentWork.ownerId;
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    // Render Details
+    const locationText = [currentWork.workCity, currentWork.workState].filter(Boolean).join(", ");
+    const postedDateStr = createdDate.toLocaleString(undefined, {
+      day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+    });
+    const expiryDateStr = expDate ? expDate.toLocaleString(undefined, {
+      day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+    }) : "Within 24 hours";
+
+    // Render Work Details Page (Requirement 9 & 15)
     container.innerHTML = `
       <div class="work-details-header-card">
+        <!-- Top Status & Expiry Bar -->
         <div class="work-details-top-bar">
-          <span class="badge badge-primary" style="font-size: 0.9rem; padding: 0.4rem 0.9rem;">
-            ${escapeHtml(currentWork.category || "General")}
-          </span>
-          <span class="badge ${currentWork.status === 'active' ? 'badge-success' : 'badge-warning'}">
-            ${t("status_" + (currentWork.status || "active"))}
-          </span>
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <span class="badge badge-primary" style="font-size: 0.95rem; padding: 0.4rem 1rem;">
+              ${escapeHtml(currentWork.category || "General")}
+            </span>
+            ${isExpired ? `
+              <span class="badge badge-danger" style="font-size: 0.9rem; padding: 0.4rem 0.9rem; font-weight: 800;">
+                WORK EXPIRED
+              </span>
+            ` : `
+              <span class="badge badge-success" style="font-size: 0.9rem; padding: 0.4rem 0.9rem;">
+                ACTIVE
+              </span>
+              <span class="countdown-badge" id="details-countdown-badge" style="font-size: 0.85rem;">
+                ⏱ Available for: <strong id="details-time-remaining">${formatRemainingTime(currentWork.expiresAt)}</strong>
+              </span>
+            `}
+          </div>
+
+          <div style="font-size: 0.9rem; color: var(--text-muted);">
+            👥 ${currentWork.applicantsCount || 0} applicant${currentWork.applicantsCount === 1 ? '' : 's'}
+          </div>
         </div>
 
-        <h1 class="work-details-title">${escapeHtml(currentWork.workName)}</h1>
+        <h1 class="work-details-title">
+          ${escapeHtml(currentWork.category || "General")} Work
+        </h1>
 
-        <!-- Meta Grid -->
+        <!-- Details Meta Grid -->
         <div class="work-details-meta-grid">
+          <div class="detail-meta-box">
+            <div class="meta-icon">${icons.user}</div>
+            <div>
+              <div class="meta-label">Worker Owner Name</div>
+              <div class="meta-value">${escapeHtml(currentWork.ownerName || "Employer")}</div>
+            </div>
+          </div>
+
           <div class="detail-meta-box">
             <div class="meta-icon">${icons.briefcase}</div>
             <div>
-              <div class="meta-label">${t("lbl_work_place")}</div>
-              <div class="meta-value">${escapeHtml(currentWork.workPlace)}</div>
+              <div class="meta-label">Category</div>
+              <div class="meta-value">${escapeHtml(currentWork.category || "General")}</div>
             </div>
           </div>
 
           <div class="detail-meta-box">
             <div class="meta-icon">${icons.mapPin}</div>
             <div>
-              <div class="meta-label">${t("lbl_work_address")}</div>
-              <div class="meta-value">${escapeHtml(currentWork.workAddress)}</div>
+              <div class="meta-label">Location (City, State)</div>
+              <div class="meta-value">${escapeHtml(locationText || "Not specified")}</div>
             </div>
           </div>
 
           <div class="detail-meta-box">
-            <div class="meta-icon">${icons.user}</div>
+            <div class="meta-icon">${icons.mapPin}</div>
             <div>
-              <div class="meta-label">${t("lbl_posted_by")}</div>
-              <div class="meta-value">${escapeHtml(currentWork.postedByName || "Employer")}</div>
+              <div class="meta-label">Work Address</div>
+              <div class="meta-value">${escapeHtml(currentWork.workAddress || "Provided upon contact")}</div>
             </div>
           </div>
 
           <div class="detail-meta-box">
             <div class="meta-icon">${icons.clock}</div>
             <div>
-              <div class="meta-label">${t("lbl_posted_on")}</div>
-              <div class="meta-value">${formatDate(currentWork.createdAt)}</div>
+              <div class="meta-label">Posted Date / Time</div>
+              <div class="meta-value" style="font-size: 0.95rem;">${postedDateStr}</div>
+            </div>
+          </div>
+
+          <div class="detail-meta-box">
+            <div class="meta-icon">${icons.clock}</div>
+            <div>
+              <div class="meta-label">Expiry Date / Time</div>
+              <div class="meta-value" style="font-size: 0.95rem; color: ${isExpired ? 'var(--danger)' : 'var(--text-main)'};">
+                ${expiryDateStr}
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Description Section -->
+        <!-- Detailed Work Section -->
         <div class="work-details-section">
-          <h3>Work Description & Requirements</h3>
-          <div class="work-details-body-text">${escapeHtml(currentWork.description)}</div>
+          <h3>Detailed Work</h3>
+          <div class="work-details-body-text">${escapeHtml(currentWork.details || "No additional details provided.")}</div>
         </div>
 
-        <!-- Contact Box -->
+        <!-- Expired Notice Banner if expired -->
+        ${isExpired ? `
+          <div style="margin-top: 1.5rem; padding: 1.25rem; background: var(--danger-light); border: 1.5px solid #fecaca; border-radius: var(--radius-md); display: flex; align-items: center; gap: 0.85rem;">
+            <span style="font-size: 1.5rem;">⚠️</span>
+            <div>
+              <div style="font-weight: 800; color: var(--danger-text); font-size: 1.05rem;">WORK EXPIRED</div>
+              <div style="color: var(--danger-text); font-size: 0.95rem;">This work is no longer available. The 24-hour availability period has ended.</div>
+            </div>
+          </div>
+        ` : ""}
+
+        <!-- Direct Contact Box with Mobile 1 and Optional Mobile 2 (Requirement 15) -->
         <div class="work-contact-box">
           <div class="contact-info-list">
-            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Direct Contact Details</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+              Contact Employer
+            </span>
             <div class="contact-phone-item">
               ${icons.phone}
-              <span>${currentWork.mobile1}</span>
-              ${currentWork.mobile2 ? `<span style="font-weight: 400; color: var(--text-muted); font-size: 0.95rem;">• Alt: ${currentWork.mobile2}</span>` : ""}
+              <span>Mobile 1: <strong>${currentWork.mobile1}</strong></span>
             </div>
+            ${currentWork.mobile2 ? `
+              <div class="contact-phone-item" style="font-size: 0.95rem;">
+                ${icons.phone}
+                <span>Mobile 2: <strong>${currentWork.mobile2}</strong></span>
+              </div>
+            ` : ""}
           </div>
 
-          <button id="btn-call-employer" class="btn btn-secondary">
-            ${icons.phone} ${t("btn_call")}
-          </button>
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button id="btn-call-mobile-1" class="btn btn-secondary">
+              ${icons.phone} ${isMobileDevice ? `CALL MOBILE 1` : `COPY MOBILE 1`}
+            </button>
+            ${currentWork.mobile2 ? `
+              <button id="btn-call-mobile-2" class="btn btn-secondary">
+                ${icons.phone} ${isMobileDevice ? `CALL MOBILE 2` : `COPY MOBILE 2`}
+              </button>
+            ` : ""}
+          </div>
         </div>
 
-        <!-- Application Status Alert if already applied -->
+        <!-- Already Applied Banner -->
         ${hasApplied ? `
-          <div style="margin-top: 1.5rem; padding: 1rem 1.25rem; background: var(--success-light); border: 1px solid #a7f3d0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between;">
-            <div style="color: var(--success-text); font-weight: 600;">
-              ✓ ${t("already_applied")}
+          <div style="margin-top: 1.5rem; padding: 1rem 1.25rem; background: var(--success-light); border: 1.5px solid #a7f3d0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="color: var(--success-text); font-weight: 700;">
+              ✓ You have already applied for this work.
             </div>
             <span class="badge ${existingApp?.status === 'accepted' ? 'badge-success' : existingApp?.status === 'rejected' ? 'badge-danger' : 'badge-warning'}">
-              Status: ${t("status_" + (existingApp?.status || 'pending'))}
+              Status: ${(existingApp?.status || 'pending').toUpperCase()}
             </span>
           </div>
         ` : ""}
 
-        <!-- Action Bar -->
+        <!-- Action Bar: Back, Apply -->
         <div class="work-details-action-bar">
           <a href="home.html" class="btn btn-secondary">
-            ← ${t("btn_back")}
+            ← BACK
           </a>
 
           ${!isOwner ? `
-            <button id="btn-apply-action" class="btn btn-primary btn-lg" ${hasApplied ? "disabled" : ""}>
-              ${hasApplied ? t("already_applied") : t("btn_apply_now")}
+            <button
+              id="btn-apply-action"
+              class="btn btn-primary btn-lg"
+              ${(isExpired || hasApplied) ? "disabled" : ""}
+              style="${isExpired ? 'opacity: 0.6; cursor: not-allowed;' : ''}"
+            >
+              ${hasApplied ? "ALREADY APPLIED" : isExpired ? "WORK EXPIRED" : "APPLY"}
             </button>
           ` : `
-            <a href="my-works.html" class="btn btn-outline-primary">
+            <a href="my-works.html" class="btn btn-outline-primary btn-lg">
               Manage in My Works
             </a>
           `}
@@ -205,30 +303,92 @@ export function initWorkDetailsPage() {
       </div>
     `;
 
-    // Setup CALL Button (Mobile tel: / Desktop Clipboard copy)
-    const callBtn = document.getElementById("btn-call-employer");
-    if (callBtn) {
-      callBtn.addEventListener("click", () => {
-        const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
-        if (isMobile) {
-          window.location.href = `tel:${currentWork.mobile1}`;
+    // Live countdown ticker on details page if still active
+    if (!isExpired && expDate) {
+      const detailsTimer = setInterval(() => {
+        const remainingMs = expDate.getTime() - Date.now();
+        const timeEl = document.getElementById("details-time-remaining");
+        const applyBtnEl = document.getElementById("btn-apply-action");
+
+        if (remainingMs <= 0) {
+          clearInterval(detailsTimer);
+          if (timeEl) timeEl.textContent = "Expired";
+          if (applyBtnEl) {
+            applyBtnEl.disabled = true;
+            applyBtnEl.textContent = "WORK EXPIRED";
+            applyBtnEl.style.opacity = "0.6";
+            applyBtnEl.style.cursor = "not-allowed";
+          }
+          const badge = document.getElementById("details-countdown-badge");
+          if (badge) {
+            badge.className = "badge badge-danger";
+            badge.textContent = "WORK EXPIRED";
+          }
         } else {
-          navigator.clipboard.writeText(currentWork.mobile1).then(() => {
-            showToast(`${t("btn_copied")}: ${currentWork.mobile1}`, "success");
+          if (timeEl) timeEl.textContent = formatRemainingTime(currentWork.expiresAt);
+        }
+      }, 1000);
+    }
+
+    // Contact button handlers (Requirement 15)
+    // Mobile: tel:PHONE_NUMBER
+    // Desktop: Copy to clipboard with instant feedback
+    function setupContactButton(btnId, phoneNumber, label) {
+      const btn = document.getElementById(btnId);
+      if (!btn || !phoneNumber) return;
+
+      btn.addEventListener("click", () => {
+        if (isMobileDevice) {
+          window.location.href = `tel:${phoneNumber}`;
+        } else {
+          navigator.clipboard.writeText(phoneNumber).then(() => {
+            const orig = btn.innerHTML;
+            btn.innerHTML = `✓ Copied: ${phoneNumber}`;
+            showToast(`Copied ${label}: ${phoneNumber}`, "success");
+            setTimeout(() => { btn.innerHTML = orig; }, 2000);
           }).catch(() => {
-            showToast(`Contact: ${currentWork.mobile1}`, "info");
+            showToast(`${label}: ${phoneNumber}`, "info");
           });
         }
       });
     }
 
-    // Setup Apply Button
+    setupContactButton("btn-call-mobile-1", currentWork.mobile1, "Mobile 1");
+    if (currentWork.mobile2) {
+      setupContactButton("btn-call-mobile-2", currentWork.mobile2, "Mobile 2");
+    }
+
+    // Apply System (Requirement 10 & 18)
+    // Verification:
+    // 1. User is logged in.
+    // 2. Work exists.
+    // 3. Work status is active.
+    // 4. Current time is before expiresAt.
+    // 5. Current user has not already applied.
     const applyBtn = document.getElementById("btn-apply-action");
-    if (applyBtn && !hasApplied) {
+    if (applyBtn && !isExpired && !hasApplied && !isOwner) {
       const executeApply = async () => {
+        // Condition 1: User is logged in
         if (!user) {
           showToast("Please log in to apply for this work.", "info");
-          setTimeout(() => window.location.href = "login.html", 500);
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 600);
+          return;
+        }
+
+        // Re-verify Expiry at execution time (Requirement 18: backend and client time verification)
+        const latestExp = getExpiryDate(currentWork);
+        if (!latestExp || Date.now() >= latestExp.getTime() || currentWork.status !== "active") {
+          showToast("This work is no longer available.", "error");
+          applyBtn.disabled = true;
+          applyBtn.textContent = "WORK EXPIRED";
+          return;
+        }
+
+        // Condition 5: Double check duplicate applications
+        if (hasApplied) {
+          showToast("You have already applied for this work.", "error");
           return;
         }
 
@@ -241,18 +401,31 @@ export function initWorkDetailsPage() {
             workId: workId,
             applicantId: user.uid,
             applicantName: profile?.name || user.displayName || "Applicant",
-            applicantEmail: user.email || "",
             applicantMobile: profile?.mobile || "Not provided",
             appliedAt: isDemoMode ? new Date().toISOString() : serverTimestamp(),
             status: "pending"
           };
 
           if (!isDemoMode && db) {
-            // Save application
-            const newAppRef = await addDoc(collection(db, "applications"), applicationData);
-            await updateDoc(newAppRef, { applicationId: newAppRef.id });
+            // Check in Firestore before writing to guarantee duplicate prevention
+            const dupQuery = query(
+              collection(db, "applications"),
+              where("workId", "==", workId),
+              where("applicantId", "==", user.uid)
+            );
+            const dupSnap = await getDocs(dupQuery);
+            if (!dupSnap.empty) {
+              showToast("You have already applied for this work.", "error");
+              applyBtn.disabled = true;
+              applyBtn.textContent = "ALREADY APPLIED";
+              return;
+            }
 
-            // Increment applicant count on work
+            // Save Application
+            const appRef = await addDoc(collection(db, "applications"), applicationData);
+            await updateDoc(appRef, { applicationId: appRef.id });
+
+            // Increment applicant count on work post
             await updateDoc(doc(db, "works", workId), {
               applicantsCount: increment(1)
             });
@@ -272,22 +445,24 @@ export function initWorkDetailsPage() {
             mockStore.saveData(dbData);
           }
 
-          showToast(t("application_submitted"), "success");
+          showToast("Application submitted successfully!", "success");
+          hasApplied = true;
+          applyBtn.textContent = "ALREADY APPLIED";
+
           setTimeout(() => {
             window.location.reload();
           }, 800);
         } catch (err) {
-          console.error("Apply error:", err);
-          showToast(t("err_network"), "error");
+          showToast("Failed to submit application. Work may have expired or is unavailable.", "error");
           applyBtn.disabled = false;
-          applyBtn.textContent = t("btn_apply_now");
+          applyBtn.textContent = "APPLY";
         }
       };
 
       applyBtn.addEventListener("click", executeApply);
 
-      // Trigger automatically if query param `?apply=true` was passed
-      if (autoApply && !hasApplied) {
+      // Trigger if user navigated with ?apply=true
+      if (autoApply) {
         executeApply();
       }
     }
@@ -321,17 +496,24 @@ export function initMyApplicationsPage() {
           myApps.push({ id: d.id, applicationId: d.id, ...d.data() });
         });
 
-        // Fetch corresponding work details
+        // Fetch corresponding works
         for (const app of myApps) {
           if (app.workId && !worksMap[app.workId]) {
-            const wSnap = await getDoc(doc(db, "works", app.workId));
-            if (wSnap.exists()) {
-              worksMap[app.workId] = wSnap.data();
-            }
+            try {
+              const wSnap = await getDoc(doc(db, "works", app.workId));
+              if (wSnap.exists()) worksMap[app.workId] = wSnap.data();
+            } catch (e) { /* silent */ }
           }
         }
       } catch (err) {
-        console.warn("Could not load applications from Firestore:", err);
+        // Fallback
+        try {
+          const snap = await getDocs(collection(db, "applications"));
+          snap.forEach((d) => {
+            const data = d.data();
+            if (data.applicantId === user.uid) myApps.push({ id: d.id, applicationId: d.id, ...data });
+          });
+        } catch (e) { /* silent */ }
       }
     } else {
       const data = mockStore.getData();
@@ -341,19 +523,15 @@ export function initMyApplicationsPage() {
     }
 
     // Sort latest applied first
-    myApps.sort((a, b) => {
-      const tA = a.appliedAt?.toDate ? a.appliedAt.toDate() : new Date(a.appliedAt || 0);
-      const tB = b.appliedAt?.toDate ? b.appliedAt.toDate() : new Date(b.appliedAt || 0);
-      return tB - tA;
-    });
+    myApps.sort((a, b) => getCreatedDate({ createdAt: b.appliedAt }).getTime() - getCreatedDate({ createdAt: a.appliedAt }).getTime());
 
     if (myApps.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">📄</div>
-          <h3 class="empty-state-title">${t("no_apps_yet")}</h3>
-          <p class="empty-state-desc">You haven't submitted any job or work applications yet. Discover open work opportunities today.</p>
-          <a href="home.html" class="btn btn-primary">${t("btn_explore_works")}</a>
+          <h3 class="empty-state-title">No Applications Submitted</h3>
+          <p class="empty-state-desc">You haven't submitted any applications for 24-hour works yet.</p>
+          <a href="home.html" class="btn btn-primary">EXPLORE AVAILABLE WORK</a>
         </div>
       `;
       return;
@@ -363,25 +541,34 @@ export function initMyApplicationsPage() {
       .map((app) => {
         const work = worksMap[app.workId] || {};
         const status = app.status || "pending";
+        const dateStr = formatRemainingTime ? formatRemainingTime(work.expiresAt) : "";
+        const locationText = [work.workCity, work.workState].filter(Boolean).join(", ") || "Location";
+
         return `
           <div class="application-card">
             <div>
-              <h3 class="app-work-title">${escapeHtml(work.workName || "Work Opportunity")}</h3>
-              <div class="app-meta-text">
-                ${icons.mapPin} ${escapeHtml(work.workPlace || "Location")} • ${escapeHtml(work.category || "General")}
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <span class="badge badge-primary">${escapeHtml(work.category || "General")}</span>
+                <span class="badge ${work.status === 'active' ? 'badge-success' : 'badge-warning'}">
+                  ${work.status === 'active' ? 'Active Work' : 'Closed Work'}
+                </span>
               </div>
-              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">
-                ${icons.clock} Applied on: ${formatDate(app.appliedAt)}
+              <h3 class="app-work-title">${escapeHtml(work.category || "General")} Work - ${escapeHtml(work.ownerName || "Employer")}</h3>
+              <div class="app-meta-text">
+                ${icons.mapPin} ${escapeHtml(locationText)} • ${escapeHtml(work.workAddress || "")}
+              </div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
+                ${icons.clock} Applied: ${app.appliedAt ? new Date(app.appliedAt?.toDate ? app.appliedAt.toDate() : app.appliedAt).toLocaleDateString() : 'Recently'}
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
               <span class="badge ${status === 'accepted' ? 'badge-success' : status === 'rejected' ? 'badge-danger' : 'badge-warning'}" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;">
-                ${t("status_" + status)}
+                STATUS: ${status.toUpperCase()}
               </span>
 
               <a href="work-details.html?id=${app.workId}" class="btn btn-secondary btn-sm">
-                ${t("btn_view_details")}
+                VIEW WORK
               </a>
             </div>
           </div>
@@ -389,14 +576,4 @@ export function initMyApplicationsPage() {
       })
       .join("");
   });
-}
-
-function escapeHtml(str) {
-  if (!str) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }

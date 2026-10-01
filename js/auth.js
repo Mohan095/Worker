@@ -108,7 +108,6 @@ export async function handleGuestSignIn() {
         const cred = await signInAnonymously(auth);
         user = cred.user;
       } catch (fbErr) {
-        console.warn("Firebase Anonymous Auth not enabled or failed, falling back to local guest session:", fbErr);
         // Fallback local guest session
         user = {
           uid: "guest-" + Date.now().toString(36),
@@ -152,7 +151,7 @@ export async function handleGuestSignIn() {
         guestProfile.createdAt = serverTimestamp();
         await setDoc(doc(db, "users", user.uid), guestProfile, { merge: true });
       } catch (e) {
-        console.warn("Could not save guest to Firestore:", e);
+        // Silent fallback
       }
     } else {
       const dbData = mockStore.getData();
