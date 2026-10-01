@@ -10,6 +10,10 @@ import {
   doc,
   setDoc,
   getDoc,
+  getDocs,
+  collection,
+  query,
+  where,
   updateDoc,
   serverTimestamp
 } from "./firebase-config.js";
@@ -185,6 +189,68 @@ export function initProfileView() {
           initialsEl.textContent = (profile.name || "U").charAt(0).toUpperCase();
         }
       }
+    }
+
+    // Populate Activity Stats Ribbon
+    const statWorks = document.getElementById("stat-works-count");
+    const statApps = document.getElementById("stat-apps-count");
+
+    if (statWorks || statApps) {
+      if (!isDemoMode && db) {
+        try {
+          if (statWorks) {
+            const wQuery = query(collection(db, "works"), where("ownerId", "==", user.uid));
+            const wSnap = await getDocs(wQuery);
+            statWorks.textContent = wSnap.size || 0;
+          }
+          if (statApps) {
+            const aQuery = query(collection(db, "applications"), where("applicantId", "==", user.uid));
+            const aSnap = await getDocs(aQuery);
+            statApps.textContent = aSnap.size || 0;
+          }
+        } catch (e) {
+          // Fallback check
+          try {
+            if (statWorks) {
+              const allW = await getDocs(collection(db, "works"));
+              let c = 0;
+              allW.forEach((d) => { if (d.data().ownerId === user.uid) c++; });
+              statWorks.textContent = c;
+            }
+            if (statApps) {
+              const allA = await getDocs(collection(db, "applications"));
+              let c = 0;
+              allA.forEach((d) => { if (d.data().applicantId === user.uid) c++; });
+              statApps.textContent = c;
+            }
+          } catch (err) { /* silent */ }
+        }
+      } else {
+        const d = mockStore.getData();
+        if (statWorks) {
+          const userWorks = Object.values(d.works || {}).filter((w) => w.ownerId === user.uid);
+          statWorks.textContent = userWorks.length;
+        }
+        if (statApps) {
+          const userApps = Object.values(d.applications || {}).filter((a) => a.applicantId === user.uid);
+          statApps.textContent = userApps.length;
+        }
+      }
+    }
+
+    // Phone Copy Button
+    const copyPhoneBtn = document.getElementById("btn-copy-profile-phone");
+    if (copyPhoneBtn && profile.mobile) {
+      copyPhoneBtn.onclick = () => {
+        navigator.clipboard.writeText(profile.mobile).then(() => {
+          const orig = copyPhoneBtn.textContent;
+          copyPhoneBtn.textContent = "Copied!";
+          showToast(`Phone number copied: ${profile.mobile}`, "success");
+          setTimeout(() => { copyPhoneBtn.textContent = orig; }, 2000);
+        }).catch(() => {
+          showToast(`Mobile: ${profile.mobile}`, "info");
+        });
+      };
     }
 
     // Edit Profile Modal Wiring

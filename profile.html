@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Profile - Work Connect</title>
-  <meta name="description" content="View and manage your personal Work Connect profile, contact information, and language preferences." />
+  <title>My Profile - Worker</title>
+  <meta name="description" content="View and manage your personal Worker profile, contact information, statistics, and language preferences." />
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
   
   <link rel="stylesheet" href="css/style.css" />
@@ -15,77 +15,147 @@
   <div id="app-header-container"></div>
 
   <main class="main-content">
-    <div class="container" style="max-width: 800px;">
+    <div class="container" style="max-width: 840px;">
       <div class="profile-card" id="profile-display-card">
-        <!-- Profile Banner -->
-        <div class="profile-hero"></div>
+        <!-- Animated Multi-Color Mesh Gradient Hero -->
+        <div class="profile-hero">
+          <div class="profile-hero-pattern"></div>
+        </div>
 
-        <!-- Profile Info Header -->
+        <!-- Profile Info Header with Avatar Ring & Action -->
         <div class="profile-info-header">
           <div style="display: flex; align-items: flex-end; gap: 1.25rem; flex-wrap: wrap;">
-            <img id="display-profile-avatar" class="profile-avatar-large" src="" alt="Profile Avatar" />
-            <div id="display-profile-initials" class="profile-avatar-large-initials" style="display: none;">U</div>
-            <div>
-              <h1 class="profile-name" id="display-profile-name">User</h1>
-              <div class="profile-email" id="display-profile-email">user@example.com</div>
+            <div class="profile-avatar-wrapper">
+              <img id="display-profile-avatar" class="profile-avatar-large" src="" alt="Profile Avatar" />
+              <div id="display-profile-initials" class="profile-avatar-large-initials" style="display: none;">U</div>
+              <span class="profile-status-dot" title="Active & Available"></span>
+            </div>
+
+            <div class="profile-name-group">
+              <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <h1 class="profile-name" id="display-profile-name">User</h1>
+                <span class="profile-role-badge">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  Verified Member
+                </span>
+              </div>
+              <div class="profile-email">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                <span id="display-profile-email">user@example.com</span>
+              </div>
             </div>
           </div>
 
-          <button id="btn-edit-profile-trigger" class="btn btn-primary btn-sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-            <span data-i18n="btn_edit_profile">Edit Profile</span>
+          <button id="btn-edit-profile-trigger" class="btn btn-primary btn-sm btn-profile-edit-trigger">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            <span>Edit Profile</span>
           </button>
+        </div>
+
+        <!-- Interactive Stats Ribbon -->
+        <div class="profile-stats-ribbon">
+          <a href="my-works.html" class="profile-stat-box" style="text-decoration: none; color: inherit;">
+            <div class="profile-stat-icon icon-blue">📋</div>
+            <div>
+              <div class="profile-stat-number" id="stat-works-count">0</div>
+              <div class="profile-stat-label">Posted Works</div>
+            </div>
+          </a>
+
+          <a href="my-applications.html" class="profile-stat-box" style="text-decoration: none; color: inherit;">
+            <div class="profile-stat-icon icon-teal">📄</div>
+            <div>
+              <div class="profile-stat-number" id="stat-apps-count">0</div>
+              <div class="profile-stat-label">My Applications</div>
+            </div>
+          </a>
+
+          <div class="profile-stat-box">
+            <div class="profile-stat-icon icon-amber">⏱</div>
+            <div>
+              <div class="profile-stat-number" style="font-size: 1.15rem; color: #d97706;">24h Live</div>
+              <div class="profile-stat-label">Direct Hiring</div>
+            </div>
+          </div>
         </div>
 
         <!-- Profile Details Grid -->
         <div class="profile-content">
           <div class="profile-details-grid">
-            <div>
-              <div class="profile-item-label" data-i18n="lbl_location">City / District</div>
-              <div class="profile-item-val" id="display-profile-location">Loading...</div>
+            <!-- City / District -->
+            <div class="profile-info-tile">
+              <div class="profile-tile-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              </div>
+              <div class="profile-tile-data">
+                <div class="profile-item-label">City / District</div>
+                <div class="profile-item-val" id="display-profile-location">Loading...</div>
+              </div>
             </div>
 
-            <div>
-              <div class="profile-item-label" data-i18n="lbl_mobile">Mobile Number</div>
-              <div class="profile-item-val" id="display-profile-phone">Loading...</div>
+            <!-- Mobile Number -->
+            <div class="profile-info-tile">
+              <div class="profile-tile-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              </div>
+              <div class="profile-tile-data" style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div class="profile-item-label">Mobile Number</div>
+                  <div class="profile-item-val" id="display-profile-phone">Loading...</div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-copy-profile-phone" style="padding: 3px 8px; font-size: 0.75rem;" title="Copy Phone Number">
+                  Copy
+                </button>
+              </div>
             </div>
 
-            <div style="grid-column: 1 / -1;">
-              <div class="profile-item-label" data-i18n="lbl_address">Street Address / Landmark</div>
-              <div class="profile-item-val" id="display-profile-address">Loading...</div>
+            <!-- Street Address & Landmark -->
+            <div class="profile-info-tile" style="grid-column: 1 / -1;">
+              <div class="profile-tile-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+              </div>
+              <div class="profile-tile-data">
+                <div class="profile-item-label">Street Address / Workplace Landmark</div>
+                <div class="profile-item-val" id="display-profile-address">Loading...</div>
+              </div>
             </div>
           </div>
 
           <!-- Language Settings Box -->
-          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-            <div>
-              <div style="font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                Preferred Language
+          <div class="profile-lang-box">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <div style="width: 40px; height: 40px; border-radius: var(--radius-md); background: #ffffff; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
               </div>
-              <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
-                Current: <strong id="display-profile-language">English</strong>
+              <div>
+                <div style="font-weight: 700; color: var(--text-main);">Preferred Language</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1px;">
+                  Current: <strong id="display-profile-language">English</strong>
+                </div>
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <select id="profile-language-select" class="form-control" style="width: auto; padding: 0.45rem 1rem;">
-                <option value="en">English</option>
-                <option value="ta">தமிழ் (Tamil)</option>
-                <option value="hi">हिन्दी (Hindi)</option>
-              </select>
-            </div>
+            <select id="profile-language-select" class="form-control" style="width: auto; padding: 0.45rem 1rem; border-radius: var(--radius-full); font-weight: 600;">
+              <option value="en">English</option>
+              <option value="ta">தமிழ் (Tamil)</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+            </select>
           </div>
 
-          <!-- Actions Bar -->
+          <!-- Actions Bar: Home, Add Work, Logout -->
           <div class="profile-actions-bar">
-            <a href="home.html" class="btn btn-secondary">
-              ← <span data-i18n="nav_home">Home</span>
-            </a>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <a href="home.html" class="btn btn-secondary">
+                ← Home
+              </a>
+              <a href="add-work.html" class="btn btn-outline-primary">
+                + Post New Work
+              </a>
+            </div>
 
             <button id="btn-profile-logout" class="btn btn-outline-danger">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-              <span data-i18n="nav_logout">Logout</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <span>Logout</span>
             </button>
           </div>
         </div>
@@ -93,38 +163,38 @@
     </div>
   </main>
 
-  <!-- Edit Profile Modal -->
+  <!-- Edit Profile Modal with Glassmorphism dialog -->
   <div class="modal-backdrop" id="edit-profile-modal">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
-        <h3 class="modal-title" data-i18n="btn_edit_profile">Edit Profile</h3>
+        <h3 class="modal-title">Edit Profile</h3>
         <button class="modal-close-btn" id="btn-close-edit-modal">&times;</button>
       </div>
-      <form id="profile-edit-form">
+      <form id="profile-edit-form" novalidate>
         <div class="modal-body">
           <div class="form-group">
-            <label class="form-label" for="edit-input-name" data-i18n="lbl_name">Full Name</label>
-            <input type="text" id="edit-input-name" class="form-control" required />
+            <label class="form-label" for="edit-input-name">Full Name <span class="required">*</span></label>
+            <input type="text" id="edit-input-name" class="form-control" placeholder="Enter your full name" required />
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="edit-input-location" data-i18n="lbl_location">City / District</label>
-            <input type="text" id="edit-input-location" class="form-control" required />
+            <label class="form-label" for="edit-input-location">City / District <span class="required">*</span></label>
+            <input type="text" id="edit-input-location" class="form-control" placeholder="e.g. Sivakasi, Madurai, Chennai" required />
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="edit-input-address" data-i18n="lbl_address">Street Address / Landmark</label>
-            <input type="text" id="edit-input-address" class="form-control" required />
+            <label class="form-label" for="edit-input-address">Street Address / Landmark <span class="required">*</span></label>
+            <input type="text" id="edit-input-address" class="form-control" placeholder="e.g. No. 12, Main Road" required />
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="edit-input-mobile" data-i18n="lbl_mobile">Mobile Number</label>
-            <input type="tel" id="edit-input-mobile" class="form-control" maxlength="10" required />
+            <label class="form-label" for="edit-input-mobile">Mobile Number (10 digits) <span class="required">*</span></label>
+            <input type="tel" id="edit-input-mobile" class="form-control" placeholder="10-digit mobile number" maxlength="10" required />
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="btn-cancel-edit-modal" data-i18n="btn_cancel">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btn-submit-edit-profile" data-i18n="btn_save_changes">Save Changes</button>
+          <button type="button" class="btn btn-secondary" id="btn-cancel-edit-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-edit-profile">Save Changes</button>
         </div>
       </form>
     </div>
